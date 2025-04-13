@@ -12,8 +12,17 @@ import (
 // вызывается функция fn. Она служит для подсчёта количества и суммы
 // сгенерированных чисел.
 func Generator(ctx context.Context, ch chan<- int64, fn func(int64)) {
-	// 1. Функция Generator
-	// ...
+	var num int64 = 1
+	for {
+		select {
+		case <-ctx.Done():
+			close(ch)
+			return
+		case ch <- num:
+			fn(num)
+			num++
+		}
+	}
 }
 
 // Worker читает число из канала in и пишет его в канал out.
