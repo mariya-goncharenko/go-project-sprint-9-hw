@@ -69,7 +69,16 @@ func main() {
 	var wg sync.WaitGroup
 
 	// 4. Собираем числа из каналов outs
-	// ...
+	for i, out := range outs {
+		wg.Add(1)
+		go func(i int, out <-chan int64) {
+			defer wg.Done()
+			for v := range out {
+				amounts[i]++
+				chOut <- v
+			}
+		}(i, out)
+	}
 
 	go func() {
 		// ждём завершения работы всех горутин для outs
@@ -82,7 +91,10 @@ func main() {
 	var sum int64   // сумма чисел результирующего канала
 
 	// 5. Читаем числа из результирующего канала
-	// ...
+	for v := range chOut {
+		count++
+		sum += v
+	}
 
 	fmt.Println("Количество чисел", inputCount, count)
 	fmt.Println("Сумма чисел", inputSum, sum)
